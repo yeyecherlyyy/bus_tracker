@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("../db");
 
+const JWT_SECRET = process.env.JWT_SECRET || "trackmybus-jwt-secret-change-in-production";
+
 // POST /api/auth/signup
 router.post("/signup", async (req, res) => {
   try {
@@ -25,7 +27,7 @@ router.post("/signup", async (req, res) => {
     const user = result.rows[0];
     const token = jwt.sign(
       { id: user.id, role: user.role, name: user.name },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: "12h" }
     );
 
@@ -35,7 +37,7 @@ router.post("/signup", async (req, res) => {
       return res.status(409).json({ error: "Phone number already registered" });
     }
     console.error("Signup error:", err);
-    res.status(500).json({ error: "Signup failed" });
+    res.status(500).json({ error: err.message || "Signup failed" });
   }
 });
 
@@ -66,7 +68,7 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, role: user.role, name: user.name },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: "12h" }
     );
 
@@ -76,7 +78,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (err) {
     console.error("Login error:", err);
-    res.status(500).json({ error: "Login failed" });
+    res.status(500).json({ error: err.message || "Login failed" });
   }
 });
 
